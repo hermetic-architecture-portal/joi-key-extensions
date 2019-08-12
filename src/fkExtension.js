@@ -148,9 +148,11 @@ const fkBaseExtension = (joi, baseType) => ({
 
 const fkStringExtension = joi => fkBaseExtension(joi, 'string');
 const fkNumberExtension = joi => fkBaseExtension(joi, 'number');
+const fkDateExtension = joi => fkBaseExtension(joi, 'date');
 
 
 export default {
   string: fkStringExtension,
   number: fkNumberExtension,
+  date: fkDateExtension,
 };

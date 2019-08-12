@@ -121,9 +121,23 @@ const pkNumberExtension = joi => ({
   ],
 });
 
+const pkDateExtension = joi => ({
+  name: 'date',
+  base: joi.date(),
+  // eslint-disable-next-line no-unused-vars
+  rules: [
+    {
+      name: 'pk',
+      params: {},
+      // eslint-disable-next-line no-unused-vars
+      validate: (params, value, state, prefs) => value,
+    },
+  ],
+});
 
 export default {
   array: pkArrayExtension,
   string: pkStringExtension,
   number: pkNumberExtension,
+  date: pkDateExtension,
 };
