@@ -1,13 +1,12 @@
 {
   "name": "joi-key-extensions",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "",
   "main": "lib/index.js",
   "scripts": {
     "build": "eslint src && babel src -d lib",
     "test": "jest"
   },
-  "keywords": [],
   "author": "",
   "license": "MIT",
   "devDependencies": {
@@ -20,5 +19,16 @@
     "eslint-plugin-jest": "^22.3.2",
     "jest": "^24.8.0",
     "joi": "^14.3.1"
+  },
+  "keywords": [
+    "joi",
+    "validation"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/hermetic-architecture-portal/joi-key-extensions"
+  },
+  "bugs": {
+    "url": "https://github.com/hermetic-architecture-portal/joi-key-extensions/issues"
   }
 }
