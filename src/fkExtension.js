@@ -1,9 +1,9 @@
 const findFk = (fkValue, data, pathChunks, parentFieldName, parentValue) => {
-  if (!data) {
+  if (typeof data === 'undefined') {
     return null;
   }
   if ((!pathChunks.length) && (fkValue === data)) {
-    return data;
+    return true;
   }
   if (!pathChunks.length) {
     return null;
