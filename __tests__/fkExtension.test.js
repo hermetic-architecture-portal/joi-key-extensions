@@ -2,7 +2,8 @@ import VanillaJoi from 'joi';
 import { fkExtension } from '../src/index';
 
 const Joi = VanillaJoi
-  .extend(fkExtension.string);
+  .extend(fkExtension.string)
+  .extend(fkExtension.number);
 
 const singlePartFkSchema = Joi.object({
   makes: Joi.array().items({
@@ -157,6 +158,27 @@ describe('fkExtension', () => {
       context: {
         data: goodData,
         schema: trickySchema,
+      },
+    });
+    expect(validationResult.error).toBeFalsy();
+  });
+  it('processes zero as a lookup key', () => {
+    const numberSchema = Joi.object({
+      people: Joi.array().items({
+        personId: Joi.number(),
+        parentPersonId: Joi.number().optional().fk('people.[].personId'),
+      }),
+    });
+    const goodData = {
+      people: [
+        { personId: 0 },
+        { personId: 1, parentPersonId: 0 },
+      ],
+    };
+    const validationResult = Joi.validate(goodData, numberSchema, {
+      context: {
+        data: goodData,
+        schema: numberSchema,
       },
     });
     expect(validationResult.error).toBeFalsy();
