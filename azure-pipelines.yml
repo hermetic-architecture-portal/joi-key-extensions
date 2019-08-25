@@ -16,6 +16,10 @@ steps:
   displayName: 'Install Node.js'
 
 - script: |
+    npm version prerelease --preid=beta
+  displayName: 'increment version'
+
+- script: |
     npm install
     npm run build
   displayName: 'npm install'
