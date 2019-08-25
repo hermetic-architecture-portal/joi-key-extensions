@@ -16,6 +16,8 @@ steps:
   displayName: 'Install Node.js'
 
 - script: |
+    git config user.email pipeline@dev.azure.com
+    git config user.name build-pipeline
     npm version prerelease --preid=beta
   displayName: 'increment version'
 
