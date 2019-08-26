@@ -20,13 +20,12 @@ steps:
   persistCredentials: true
 
 - script: echo "registry=https://registry.npmjs.org/" > .npmrc
+  displayName: "create npmrc"
 
 - task: npmAuthenticate@0
   inputs:
     workingFile: .npmrc
     customEndpoint: 'npmjs.org'
-
-- script: cat .npmrc
 
 - script: |
     git config user.email pipeline@dev.azure.com
@@ -53,21 +52,8 @@ steps:
   displayName: 'npm test'
 
 - script: |
-    cat package.json
-    git --no-pager log -n 2
-    git show-ref --tags -d
-  displayName: 'verify'
-
-- script: |
     git push --tags
   displayName: 'push to GitHub'
 
 - script: npm publish --tag=beta
   displayName: 'npm publish'
-
-
-# - task: Npm@1
-#   inputs:
-#     command: custom
-#     publishEndpoint: npmjs.org
-#     customCommand: publish --tag=beta
