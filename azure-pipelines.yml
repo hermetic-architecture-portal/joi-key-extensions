@@ -43,6 +43,15 @@ steps:
   condition: and(succeeded(), ne(variables['Build.SourceBranch'], variables.master_branch))
 
 - script: |
+    git config user.email pipeline@dev.azure.com
+    git config user.name build-pipeline
+    VERSION=`node -p "require('./package.json').version"`
+    echo "Version: $VERSION"
+    git tag -f $VERSION
+  displayName: tag $(master_tag) version
+  condition: and(succeeded(), eq(variables['Build.SourceBranch'], variables.master_branch))
+
+- script: |
     npm install
     npm run build
   displayName: 'npm install'
@@ -55,10 +64,6 @@ steps:
     npm run test
   displayName: 'npm test'
 
-- script: |
-    git push --tags
-  displayName: 'push to GitHub'
-
 - script: npm publish --tag=beta
   displayName: 'npm publish beta'
   condition: and(succeeded(), ne(variables['Build.SourceBranch'], variables.master_branch))
@@ -66,3 +71,7 @@ steps:
 - script: npm publish --tag=$MASTER_TAG
   displayName: npm publish $(master_tag)
   condition: and(succeeded(), eq(variables['Build.SourceBranch'], variables.master_branch))
+
+- script: |
+    git push --tags
+  displayName: 'push to GitHub'
