@@ -1,6 +1,9 @@
+# The variables are here to enable testing of the pipeline
 variables:
- master_branch: refs/heads/feature/pretendMaster
- master_tag: prerelease
+ # set this to another branch when testing prod/master releases
+ master_branch: refs/heads/feature/master
+ # set this to "prerelease" when testing prod/master releases
+ master_tag: latest
 
 trigger:
   branches:
@@ -11,13 +14,9 @@ trigger:
     exclude:
       - azure-pipelines
     
-
-
 pool:
   vmImage: 'ubuntu-latest'
 
-steps:
-- script: echo tag=$MASTER_TAG
 - task: NodeTool@0
   inputs:
     versionSpec: '10.x'
@@ -25,16 +24,21 @@ steps:
 
 - checkout: self
   clean: true
+  # persistCredentials so we can push tags to the remote repo
   persistCredentials: true
 
+# npmAuthenticate task expects an npmrc file to exist
 - script: echo "registry=https://registry.npmjs.org/" > .npmrc
   displayName: "create npmrc"
 
+# npmAuthenticate is being used because the npm publish 
 - task: npmAuthenticate@0
   inputs:
     workingFile: .npmrc
     customEndpoint: 'npmjs.org'
 
+# for feature/bugfix branches update the package version
+# and tag the git repo
 - script: |
     git config user.email pipeline@dev.azure.com
     git config user.name build-pipeline
@@ -47,6 +51,7 @@ steps:
   displayName: 'increment version'
   condition: and(succeeded(), ne(variables['Build.SourceBranch'], variables.master_branch))
 
+# for master branch tag the git repo for the existing package version
 - script: |
     git config user.email pipeline@dev.azure.com
     git config user.name build-pipeline
@@ -69,14 +74,17 @@ steps:
     npm run test
   displayName: 'npm test'
 
+# for feature/bugfix branches publish with a beta tag
 - script: npm publish --tag=beta
   displayName: 'npm publish beta'
   condition: and(succeeded(), ne(variables['Build.SourceBranch'], variables.master_branch))
 
+# for master branch publish with latest tag
 - script: npm publish --tag=$MASTER_TAG
   displayName: npm publish $(master_tag)
   condition: and(succeeded(), eq(variables['Build.SourceBranch'], variables.master_branch))
 
+# update tags on remote repo
 - script: |
     git push --tags
   displayName: 'push to GitHub'
