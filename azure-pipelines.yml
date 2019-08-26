@@ -1,7 +1,6 @@
-# Node.js
-# Build a general Node.js project with npm.
-# Add steps that analyze code, save build artifacts, deploy, and more:
-# https://docs.microsoft.com/azure/devops/pipelines/languages/javascript
+variables:
+ master_branch: refs/heads/feature/pretendMaster
+ master_tag: prerelease
 
 trigger:
 - master
@@ -40,7 +39,7 @@ steps:
     echo "Version: $VERSION"
     git tag $VERSION
   displayName: 'increment version'
-  condition: and(succeeded(), ne(variables['Build.SourceBranch'], 'refs/heads/master'))
+  condition: and(succeeded(), ne(variables['Build.SourceBranch'], variables.master_branch))
 
 - script: |
     npm install
@@ -61,8 +60,8 @@ steps:
 
 - script: npm publish --tag=beta
   displayName: 'npm publish beta'
-  condition: and(succeeded(), ne(variables['Build.SourceBranch'], 'refs/heads/master'))
+  condition: and(succeeded(), ne(variables['Build.SourceBranch'], variables.master_branch))
 
-- script: npm publish
-  displayName: 'npm publish latest'
-  condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'))
+- script: npm publish --tag=$MASTER_TAG
+  displayName: npm publish $(master_tag)
+  condition: and(succeeded(), eq(variables['Build.SourceBranch'], variables.master_branch))
