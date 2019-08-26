@@ -5,6 +5,9 @@
 
 trigger:
 - master
+- feature/*
+- bugfix/*
+
 
 pool:
   vmImage: 'ubuntu-latest'
