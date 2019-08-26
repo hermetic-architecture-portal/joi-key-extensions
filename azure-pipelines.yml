@@ -60,8 +60,12 @@ steps:
     git push --tags
   displayName: 'push to GitHub'
 
-- task: Npm@1
-  inputs:
-    command: custom
-    publishEndpoint: npmjs.org
-    customCommand: publish --tag=beta
+- script: publish --tag=beta
+  displayName: 'npm publish'
+
+
+# - task: Npm@1
+#   inputs:
+#     command: custom
+#     publishEndpoint: npmjs.org
+#     customCommand: publish --tag=beta
