@@ -55,5 +55,6 @@ steps:
 
 - task: Npm@1
   inputs:
-    command: 'publish'
+    command: custom
     publishEndpoint: npmjs.org
+    customCommand: npm publish --tag=beta
