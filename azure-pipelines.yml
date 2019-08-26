@@ -45,5 +45,5 @@ steps:
   displayName: 'verify'
 
 - script: |
-    git push --follow-tags origin $BUILD_SOURCEBRANCH
+    git push --follow-tags origin azure-pipelines
   displayName: 'push to GitHub'
