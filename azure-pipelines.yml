@@ -15,6 +15,9 @@ steps:
     versionSpec: '10.x'
   displayName: 'Install Node.js'
 
+- checkout: self 
+  persistCredentials: true
+
 - script: |
     git config user.email pipeline@dev.azure.com
     git config user.name build-pipeline
