@@ -22,6 +22,8 @@ steps:
 - script: |
     git config user.email pipeline@dev.azure.com
     git config user.name build-pipeline
+    git --no-pager log -n 2
+    git show-ref --tags -d
     npm version prerelease --preid=beta -m "Update to %s [skip ci]"
   displayName: 'increment version'
 
