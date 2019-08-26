@@ -61,5 +61,5 @@ steps:
   condition: and(succeeded(), ne(variables['Build.SourceBranch'], 'refs/heads/master'))
 
 - script: npm publish
-  displayName: 'npm publish'
+  displayName: 'npm publish latest'
   condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'))
