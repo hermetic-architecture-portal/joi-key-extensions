@@ -24,7 +24,6 @@ steps:
     git config user.name build-pipeline
     VERSION=`npm version prerelease --no-git-tag-version --preid=beta`
     while git rev-parse "$VERSION" >/dev/null 2>&1; do
-      sleep 10
       VERSION=`npm version prerelease --no-git-tag-version --preid=beta`
     done
     echo "Version: $VERSION"
@@ -57,3 +56,4 @@ steps:
 - task: Npm@1
   inputs:
     command: 'publish'
+    publishEndpoint: npmjs.org
