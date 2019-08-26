@@ -36,6 +36,6 @@ steps:
 
 - script: |
     cat package.json
-    git --no-pager log -n 5
+    git --no-pager log --tags
   displayName: 'verify'
 
