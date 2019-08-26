@@ -44,5 +44,5 @@ steps:
   displayName: 'verify'
 
 - script: |
-    git push --tags
+    git push --follow-tags
   displayName: 'push to GitHub'
