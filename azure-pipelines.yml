@@ -19,12 +19,14 @@ steps:
   clean: true
   persistCredentials: true
 
-- script: touch .npmrc
+- script: echo "registry=https://registry.npmjs.org/" > .npmrc
 
 - task: npmAuthenticate@0
   inputs:
     workingFile: .npmrc
     customEndpoint: 'npmjs.org'
+
+- script: cat .npmrc
 
 - script: |
     git config user.email pipeline@dev.azure.com
