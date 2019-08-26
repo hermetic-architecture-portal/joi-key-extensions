@@ -55,7 +55,7 @@ steps:
 
 - task: npmAuthenticate@0
   inputs:
-    workingFile: 
+    workingFile: .npmrc
     customEndpoint: 'npmjs.org'
 - task: Npm@1
   inputs:
