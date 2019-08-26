@@ -20,6 +20,7 @@ steps:
   persistCredentials: true
 
 - script: |
+    echo "Source branch *${BUILD_SOURCEBRANCH}*"
     git config user.email pipeline@dev.azure.com
     git config user.name build-pipeline
     git status
