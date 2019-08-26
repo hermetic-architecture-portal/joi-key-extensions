@@ -3,9 +3,14 @@ variables:
  master_tag: prerelease
 
 trigger:
-- master
-- feature/*
-- bugfix/*
+  branches:
+    include:
+      - master
+      - feature/*
+      - bugfix/*
+    exclude:
+      - azure-pipelines
+    
 
 
 pool:
