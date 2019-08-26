@@ -12,6 +12,7 @@ pool:
   vmImage: 'ubuntu-latest'
 
 steps:
+- script: echo tag=$MASTER_TAG
 - task: NodeTool@0
   inputs:
     versionSpec: '10.x'
