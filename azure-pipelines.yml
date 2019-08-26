@@ -19,6 +19,13 @@ steps:
   clean: true
   persistCredentials: true
 
+- script: touch .npmrc
+
+- task: npmAuthenticate@0
+  inputs:
+    workingFile: .npmrc
+    customEndpoint: 'npmjs.org'
+
 - script: |
     git config user.email pipeline@dev.azure.com
     git config user.name build-pipeline
@@ -53,10 +60,6 @@ steps:
     git push --tags
   displayName: 'push to GitHub'
 
-- task: npmAuthenticate@0
-  inputs:
-    workingFile: .npmrc
-    customEndpoint: 'npmjs.org'
 - task: Npm@1
   inputs:
     command: custom
