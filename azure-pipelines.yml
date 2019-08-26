@@ -20,11 +20,10 @@ steps:
   persistCredentials: true
 
 - script: |
-    printenv
     git config user.email pipeline@dev.azure.com
     git config user.name build-pipeline
     VERSION=`npm version prerelease --no-git-tag-version --preid=beta`
-    until git tag $VERSION; do
+    while git rev-parse "$VERSION" >/dev/null 2>&1; do
       sleep 10
       VERSION=`npm version prerelease --no-git-tag-version --preid=beta`
     done
