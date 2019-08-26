@@ -60,7 +60,7 @@ steps:
     git push --tags
   displayName: 'push to GitHub'
 
-- script: publish --tag=beta
+- script: npm publish --tag=beta
   displayName: 'npm publish'
 
 
