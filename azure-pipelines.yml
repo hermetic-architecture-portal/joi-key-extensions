@@ -37,6 +37,7 @@ steps:
     echo "Version: $VERSION"
     git tag $VERSION
   displayName: 'increment version'
+  condition: and(succeeded(), ne(variables['Build.SourceBranch'], 'refs/heads/master'))
 
 - script: |
     npm install
@@ -56,4 +57,9 @@ steps:
   displayName: 'push to GitHub'
 
 - script: npm publish --tag=beta
+  displayName: 'npm publish beta'
+  condition: and(succeeded(), ne(variables['Build.SourceBranch'], 'refs/heads/master'))
+
+- script: npm publish
   displayName: 'npm publish'
+  condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'))
