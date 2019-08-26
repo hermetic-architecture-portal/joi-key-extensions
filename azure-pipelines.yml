@@ -53,3 +53,7 @@ steps:
 - script: |
     git push --tags
   displayName: 'push to GitHub'
+
+- task: Npm@1
+  inputs:
+    command: 'publish'
