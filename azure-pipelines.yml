@@ -20,6 +20,7 @@ steps:
   persistCredentials: true
 
 - script: |
+    printenv
     git config user.email pipeline@dev.azure.com
     git config user.name build-pipeline
     npm version prerelease --preid=beta -m "Update to %s [skip ci]"
