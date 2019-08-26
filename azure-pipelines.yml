@@ -40,3 +40,6 @@ steps:
     git show-ref --tags -d
   displayName: 'verify'
 
+- script: |
+    git push --tags
+  displayName: 'push to GitHub'
