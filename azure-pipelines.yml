@@ -34,3 +34,8 @@ steps:
     npm run test
   displayName: 'npm test'
 
+- script: |
+    cat package.json
+    git --no-pager log -n 5
+  displayName: 'verify'
+
