@@ -15,7 +15,8 @@ steps:
     versionSpec: '10.x'
   displayName: 'Install Node.js'
 
-- checkout: self 
+- checkout: self
+  clean: true
   persistCredentials: true
 
 - script: |
