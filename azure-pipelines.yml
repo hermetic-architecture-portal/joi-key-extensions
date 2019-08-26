@@ -53,6 +53,10 @@ steps:
     git push --tags
   displayName: 'push to GitHub'
 
+- task: npmAuthenticate@0
+  inputs:
+    workingFile: 
+    customEndpoint: 'npmjs.org'
 - task: Npm@1
   inputs:
     command: custom
