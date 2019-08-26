@@ -24,7 +24,9 @@ steps:
     git config user.email pipeline@dev.azure.com
     git config user.name build-pipeline
     VERSION=`npm version prerelease --no-git-tag-version --preid=beta`
-    git tag $VERSION
+    until git tag $VERSION; do
+      VERSION=`npm version prerelease --no-git-tag-version --preid=beta`
+    done
   displayName: 'increment version'
 
 - script: |
