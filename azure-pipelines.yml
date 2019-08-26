@@ -23,7 +23,8 @@ steps:
     printenv
     git config user.email pipeline@dev.azure.com
     git config user.name build-pipeline
-    npm version prerelease --preid=beta -m "Update to %s [skip ci]"
+    VERSION=`npm version prerelease --no-git-tag-version --preid=beta`
+    git tag $VERSION
   displayName: 'increment version'
 
 - script: |
@@ -46,5 +47,5 @@ steps:
   displayName: 'verify'
 
 - script: |
-    git push --follow-tags origin azure-pipelines
+    git push --tags
   displayName: 'push to GitHub'
