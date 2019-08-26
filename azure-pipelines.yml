@@ -28,6 +28,7 @@ steps:
       VERSION=`npm version prerelease --no-git-tag-version --preid=beta`
     done
     echo "Version: $VERSION"
+    git tag $VERSION
   displayName: 'increment version'
 
 - script: |
