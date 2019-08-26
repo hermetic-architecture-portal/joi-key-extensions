@@ -20,14 +20,9 @@ steps:
   persistCredentials: true
 
 - script: |
-    printenv
     git config user.email pipeline@dev.azure.com
     git config user.name build-pipeline
-    git status
-    git --no-pager log -n 2
-    git show-ref --tags -d
     npm version prerelease --preid=beta -m "Update to %s [skip ci]"
-    git status
   displayName: 'increment version'
 
 - script: |
@@ -50,6 +45,5 @@ steps:
   displayName: 'verify'
 
 - script: |
-    git status
-    git push --follow-tags
+    git push --follow-tags origin $BUILD_SOURCEBRANCH
   displayName: 'push to GitHub'
