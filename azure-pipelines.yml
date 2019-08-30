@@ -64,6 +64,7 @@ steps:
   condition: and(succeeded(), eq(variables['Build.SourceBranch'], variables.master_branch))
 
 - script: |
+    echo "VVVVersion: $VERSION"
     npm install
     npm run build
   displayName: 'npm install'
