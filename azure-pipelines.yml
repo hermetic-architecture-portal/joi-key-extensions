@@ -57,7 +57,7 @@ steps:
 - script: |
     git config user.email pipeline@dev.azure.com
     git config user.name build-pipeline
-    VERSION=`node -p "require('./package.json').version"`
+    VERSION=v`node -p "require('./package.json').version"`
     echo "Version: $VERSION"
     git tag -f $VERSION
   displayName: tag $(master_tag) version
