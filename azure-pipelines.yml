@@ -48,8 +48,6 @@ steps:
     while git rev-parse "$VERSION" >/dev/null 2>&1; do
       VERSION=`npm version prerelease --no-git-tag-version --preid=beta`
     done
-    echo "Version: $VERSION"
-    git tag $VERSION
   displayName: 'increment version'
   condition: and(succeeded(), ne(variables['Build.SourceBranch'], variables.master_branch))
 
@@ -60,11 +58,9 @@ steps:
     VERSION=v`node -p "require('./package.json').version"`
     echo "Version: $VERSION"
     git tag -f $VERSION
-  displayName: tag $(master_tag) version
-  condition: and(succeeded(), eq(variables['Build.SourceBranch'], variables.master_branch))
+  displayName: tag version
 
 - script: |
-    echo "VVVVersion: $VERSION"
     npm install
     npm run build
   displayName: 'npm install'
