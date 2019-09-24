@@ -125,6 +125,75 @@ describe('fkExtension', () => {
     expect(validationResult.error).toBeTruthy();
     expect(validationResult.error.details[0].type).toBe('string.fkNotFound');
   });
+  it('passes valid data for two part parent FK, when validating at the child', () => {
+    const vehicleSchema = Joi.object({
+      chassisNumber: Joi.string(),
+      makeId: Joi.string().fk('makes.[].makeId'),
+      modelId: Joi.string()
+        .fk('makes.[].models.[].modelId',
+          // when validating at a child part of the schema
+          // we don't have any way to find out the path of the child
+          // data in the parent schema, so need a full path to the parent field
+          { parentFieldPath: 'vehicles.[].makeId' }),
+    });
+    const parentFkWithPathSchema = Joi.object({
+      makes: Joi.array().items({
+        makeId: Joi.string(),
+        name: Joi.string(),
+        models: Joi.array().items({
+          modelId: Joi.string(),
+          name: Joi.string(),
+        }),
+      }),
+      vehicles: Joi.array().items(vehicleSchema),
+    });
+    const goodData = {
+      makes: makesParentFk,
+      vehicles: [
+        { chassisNumber: '1234', makeId: 'mazda', modelId: 'familia' },
+      ],
+    };
+    const validationResult = Joi.validate(goodData.vehicles[0], vehicleSchema, {
+      context: {
+        data: goodData,
+        schema: parentFkWithPathSchema,
+      },
+    });
+    expect(validationResult.error).toBeFalsy();
+  });
+  it('fails invalid data for two part parent FK, when validating at the child', () => {
+    const vehicleSchema = Joi.object({
+      chassisNumber: Joi.string(),
+      makeId: Joi.string().fk('makes.[].makeId'),
+      modelId: Joi.string()
+        .fk('makes.[].models.[].modelId', { parentFieldPath: 'vehicles.[].makeId' }),
+    });
+    const parentFkWithPathSchema = Joi.object({
+      makes: Joi.array().items({
+        makeId: Joi.string(),
+        name: Joi.string(),
+        models: Joi.array().items({
+          modelId: Joi.string(),
+          name: Joi.string(),
+        }),
+      }),
+      vehicles: Joi.array().items(vehicleSchema),
+    });
+    const badData = {
+      makes: makesParentFk,
+      vehicles: [
+        { chassisNumber: '1234', makeId: 'mazda', modelId: 'laser' },
+      ],
+    };
+    const validationResult = Joi.validate(badData.vehicles[0], vehicleSchema, {
+      context: {
+        data: badData,
+        schema: parentFkWithPathSchema,
+      },
+    });
+    expect(validationResult.error).toBeTruthy();
+    expect(validationResult.error.details[0].type).toBe('string.fkNotFound');
+  });
   // eslint-disable-next-line max-len
   it('passes valid data for two part parent FK when parent field name doesn\'t match lookup field name', () => {
     const trickySchema = Joi.array().items({

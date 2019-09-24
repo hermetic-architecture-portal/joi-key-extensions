@@ -66,7 +66,7 @@ const fkBaseExtension = (joi, baseType) => ({
     noContextData: 'The data to look for FK references in must be passed in options.context.data',
     noContextSchema: 'The schema being validated must be passed in options.context.schema',
     // eslint-disable-next-line max-len
-    twoArrays: '"{{path}}" contains two or more array elements, but the parentFieldName parameter is not supplied',
+    twoArrays: '"{{path}}" contains two or more array elements, but neither of the parentFieldName and parentFieldPath parameters are supplied',
     // eslint-disable-next-line max-len
     threeArrays: '"{{path}}" contains three or more array elements and there is no mechanism to locate the right FK item',
     fkNotFound: '"{{value}}" could not be found as a reference to "{{path}}"',
@@ -80,6 +80,7 @@ const fkBaseExtension = (joi, baseType) => ({
         path: joi.string().required(),
         options: joi.object({
           parentFieldName: joi.string().optional(),
+          parentFieldPath: joi.string().optional(),
         }).optional(),
       },
       validate: (params, value, state, options) => {
@@ -98,16 +99,25 @@ const fkBaseExtension = (joi, baseType) => ({
           || options.context.schema.describe();
         const { schemaDesc } = options.context;
 
-        const parentFieldName = (params.options && params.options.parentFieldName);
+        const parentFieldPath = (params.options && params.options.parentFieldPath);
+        const parentFieldName = (params.options && params.options.parentFieldName)
+          || (parentFieldPath
+            && parentFieldPath.split('.').slice(-1)[0]);
 
         let parentValue;
 
         let parentLookupFieldName;
 
         if (parentFieldName) {
-          const parentPath = state.path
-            .filter((item, index, array) => index < array.length - 1)
-            .concat(parentFieldName);
+          let parentPath;
+          if (parentFieldPath) {
+            parentPath = parentFieldPath.split('.')
+              .map(ppChunk => ((ppChunk === '[]') ? 0 : ppChunk));
+          } else {
+            parentPath = state.path
+              .filter((item, index, array) => index < array.length - 1)
+              .concat(parentFieldName);
+          }
           const parentFkRule = getParentFkPath(schemaDesc, parentPath);
           if (!parentFkRule) {
             return joi.createError(`${baseType}.parentFieldNotFound`,
