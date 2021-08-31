@@ -26,7 +26,7 @@ const data = {
 
 console.log('Example with valid data');
 
-let validationResult = Joi.validate(data, schema, {
+let validationResult = schema.validate(data, {
   context: {
     data, // pass whole object tree as context.data
     schema, // pass schema of whole object tree as context.schema
@@ -40,7 +40,7 @@ console.log('Example with invalid data');
 
 data.countries.push({ countryId: 1, countryName: 'Fiji' });
 
-validationResult = Joi.validate(data, schema, {
+validationResult = schema.validate(data, {
   context: {
     data,
     schema,

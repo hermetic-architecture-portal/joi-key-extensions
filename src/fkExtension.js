@@ -46,7 +46,7 @@ const getParentSchemaDesc = (schemaDesc, path) => {
   }
   if ((typeof path[0] === 'string')
     && (schemaDesc.type === 'object')) {
-    return getParentSchemaDesc(schemaDesc.children[path[0]], nextPath);
+    return getParentSchemaDesc(schemaDesc.keys[path[0]], nextPath);
   }
   return null;
 };
@@ -60,38 +60,47 @@ const getParentFkPath = (schemaDesc, path) => {
 };
 
 const fkBaseExtension = (joi, baseType) => ({
-  name: baseType,
+  type: baseType,
   base: joi[baseType](),
-  language: {
+  messages: {
     noContextData: 'The data to look for FK references in must be passed in options.context.data',
     noContextSchema: 'The schema being validated must be passed in options.context.schema',
     // eslint-disable-next-line max-len
-    twoArrays: '"{{path}}" contains two or more array elements, but neither of the parentFieldName and parentFieldPath parameters are supplied',
+    twoArrays: '"{{#path}}" contains two or more array elements, but neither of the parentFieldName and parentFieldPath parameters are supplied',
     // eslint-disable-next-line max-len
-    threeArrays: '"{{path}}" contains three or more array elements and there is no mechanism to locate the right FK item',
-    fkNotFound: '"{{value}}" could not be found as a reference to "{{path}}"',
+    threeArrays: '"{{#path}}" contains three or more array elements and there is no mechanism to locate the right FK item',
+    fkNotFound: '"{{#value}}" could not be found as a reference to "{{#path}}"',
     // eslint-disable-next-line max-len
-    parentFieldNotFound: 'parentFieldName {{parentFieldName}} could not be found from path {{path}} or did not have a foreign key attribute',
+    parentFieldNotFound: 'parentFieldName {{#parentFieldName}} could not be found from path {{#path}} or did not have a foreign key attribute',
   },
-  rules: [
-    {
-      name: 'fk',
-      params: {
-        path: joi.string().required(),
-        options: joi.object({
-          parentFieldName: joi.string().optional(),
-          parentFieldPath: joi.string().optional(),
-        }).optional(),
+  rules: {
+    fk: {
+      method(path, options) {
+        return this.$_addRule({ name: 'fk', args: { path, options } });
       },
-      validate: (params, value, state, options) => {
+      args: [
+        {
+          name: 'path',
+          assert: joi.string().required(),
+        },
+        {
+          name: 'options',
+          assert: joi.object({
+            parentFieldName: joi.string().optional(),
+            parentFieldPath: joi.string().optional(),
+          }).optional(),
+        },
+      ],
+      validate: (value, helpers, args) => {
+        const options = helpers.prefs;
+        const { state } = helpers;
+
         if (!(options && options.context && options.context.data)) {
-          return joi.createError(`${baseType}.noContextData`,
-            null, state, options);
+          return helpers.error('noContextData', null);
         }
 
         if (!(options && options.context && options.context.schema)) {
-          return joi.createError(`${baseType}.noContextSchema`,
-            null, state, options);
+          return helpers.error('noContextSchema', null);
         }
 
         // eslint-disable-next-line no-param-reassign
@@ -99,8 +108,8 @@ const fkBaseExtension = (joi, baseType) => ({
           || options.context.schema.describe();
         const { schemaDesc } = options.context;
 
-        const parentFieldPath = (params.options && params.options.parentFieldPath);
-        const parentFieldName = (params.options && params.options.parentFieldName)
+        const parentFieldPath = (args.options && args.options.parentFieldPath);
+        const parentFieldName = (args.options && args.options.parentFieldName)
           || (parentFieldPath
             && parentFieldPath.split('.').slice(-1)[0]);
 
@@ -120,46 +129,37 @@ const fkBaseExtension = (joi, baseType) => ({
           }
           const parentFkRule = getParentFkPath(schemaDesc, parentPath);
           if (!parentFkRule) {
-            return joi.createError(`${baseType}.parentFieldNotFound`,
-              { path: params.path, parentFieldName },
-              state, options);
+            return helpers.error('parentFieldNotFound', { path: args.path, parentFieldName });
           }
-          parentLookupFieldName = parentFkRule.arg.path
+          parentLookupFieldName = parentFkRule.args.path
             .split('.').pop();
-          parentValue = state.parent && state.parent[parentFieldName];
+          parentValue = state.ancestors[0][parentFieldName];
         }
 
-        const pathChunks = params.path.split('.');
+        const pathChunks = args.path.split('.');
 
         const arrayChunks = pathChunks.filter(c => c === '[]');
 
         if ((!parentFieldName) && (arrayChunks.length >= 2)) {
-          return joi.createError(`${baseType}.twoArrays`,
-            { path: params.path },
-            state, options);
+          return helpers.error('twoArrays', { path: args.path });
         }
 
         if (arrayChunks.length >= 3) {
-          return joi.createError(`${baseType}.threeArrays`,
-            { path: params.path },
-            state, options);
+          return helpers.error('threeArrays', { path: args.path });
         }
 
         if (!findFk(value, options.context.data, pathChunks, parentLookupFieldName, parentValue)) {
-          return joi.createError(`${baseType}.fkNotFound`,
-            { value, path: params.path },
-            state, options);
+          return helpers.error('fkNotFound', { value, path: args.path });
         }
         return value;
       },
     },
-  ],
+  },
 });
 
 const fkStringExtension = joi => fkBaseExtension(joi, 'string');
 const fkNumberExtension = joi => fkBaseExtension(joi, 'number');
 const fkDateExtension = joi => fkBaseExtension(joi, 'date');
-
 
 export default {
   string: fkStringExtension,

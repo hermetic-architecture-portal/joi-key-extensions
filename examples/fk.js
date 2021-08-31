@@ -36,7 +36,7 @@ const data = {
 };
 
 console.log('Validating whole object tree');
-let validationResult = Joi.validate(data, schema, {
+let validationResult = schema.validate(data, {
   context: {
     data, // pass whole object tree as context.data
     schema, // pass schema of whole object tree as context.schema
@@ -47,7 +47,7 @@ console.log(validationResult.error);
 // null - no error
 
 console.log('Validating one model out of the object tree');
-validationResult = Joi.validate(data.models[0], modelSchema, {
+validationResult = modelSchema.validate(data.models[0], {
   context: {
     data,
     schema,
@@ -62,7 +62,7 @@ console.log('Examples with invalid data');
 data.models[0].makeId = 'fnord';
 
 console.log('Validating whole object tree');
-validationResult = Joi.validate(data, schema, {
+validationResult = schema.validate(data, {
   context: {
     data,
     schema,
@@ -76,7 +76,7 @@ console.log(validationResult.error);
 //     ["makeId" "fnord" could not be found as a reference to "makes.[].makeId"]]]...
 
 console.log('Validating one model out of the object tree');
-validationResult = Joi.validate(data.models[0], modelSchema, {
+validationResult = modelSchema.validate(data.models[0], {
   context: {
     data,
     schema,

@@ -57,13 +57,17 @@ const makesParentFk = [
   },
 ];
 
+const validate = (data, schema, options) => {
+  return schema.validate(data, options);
+};
+
 describe('fkExtension', () => {
   it('passes valid data for single part FK', () => {
     const goodData = {
       makes: makesSinglePart,
       models: modelsSinglePart,
     };
-    const validationResult = Joi.validate(goodData, singlePartFkSchema, {
+    const validationResult = validate(goodData, singlePartFkSchema, {
       context: {
         data: goodData,
         schema: singlePartFkSchema,
@@ -76,23 +80,24 @@ describe('fkExtension', () => {
       makes: makesSinglePart,
       models: [Object.assign({}, modelsSinglePart[0], { makeId: 'nissan' })],
     };
-    const validationResult = Joi.validate(badData, singlePartFkSchema, {
+    const validationResult = validate(badData, singlePartFkSchema, {
       context: {
         data: badData,
         schema: singlePartFkSchema,
       },
     });
     expect(validationResult.error).toBeTruthy();
-    expect(validationResult.error.details[0].type).toBe('string.fkNotFound');
+    expect(validationResult.error.details[0].type).toBe('fkNotFound');
+    expect(validationResult.error.message).toBe('"nissan" could not be found as a reference to "makes.[].makeId"');
   });
   it('fails validation when context is not supplied', () => {
     const goodData = {
       makes: makesSinglePart,
       models: modelsSinglePart,
     };
-    const validationResult = Joi.validate(goodData, singlePartFkSchema);
+    const validationResult = validate(goodData, singlePartFkSchema);
     expect(validationResult.error).toBeTruthy();
-    expect(validationResult.error.details[0].type).toBe('string.noContextData');
+    expect(validationResult.error.details[0].type).toBe('noContextData');
   });
   it('passes valid data for two part parent FK', () => {
     const goodData = {
@@ -101,7 +106,7 @@ describe('fkExtension', () => {
         { chassisNumber: '1234', makeId: 'mazda', modelId: 'familia' },
       ],
     };
-    const validationResult = Joi.validate(goodData, parentFkSchema, {
+    const validationResult = validate(goodData, parentFkSchema, {
       context: {
         data: goodData,
         schema: parentFkSchema,
@@ -116,14 +121,14 @@ describe('fkExtension', () => {
         { chassisNumber: '1234', makeId: 'mazda', modelId: 'laser' },
       ],
     };
-    const validationResult = Joi.validate(badData, parentFkSchema, {
+    const validationResult = validate(badData, parentFkSchema, {
       context: {
         data: badData,
         schema: parentFkSchema,
       },
     });
     expect(validationResult.error).toBeTruthy();
-    expect(validationResult.error.details[0].type).toBe('string.fkNotFound');
+    expect(validationResult.error.details[0].type).toBe('fkNotFound');
   });
   it('passes valid data for two part parent FK, when validating at the child', () => {
     const vehicleSchema = Joi.object({
@@ -153,7 +158,7 @@ describe('fkExtension', () => {
         { chassisNumber: '1234', makeId: 'mazda', modelId: 'familia' },
       ],
     };
-    const validationResult = Joi.validate(goodData.vehicles[0], vehicleSchema, {
+    const validationResult = validate(goodData.vehicles[0], vehicleSchema, {
       context: {
         data: goodData,
         schema: parentFkWithPathSchema,
@@ -185,14 +190,14 @@ describe('fkExtension', () => {
         { chassisNumber: '1234', makeId: 'mazda', modelId: 'laser' },
       ],
     };
-    const validationResult = Joi.validate(badData.vehicles[0], vehicleSchema, {
+    const validationResult = validate(badData.vehicles[0], vehicleSchema, {
       context: {
         data: badData,
         schema: parentFkWithPathSchema,
       },
     });
     expect(validationResult.error).toBeTruthy();
-    expect(validationResult.error.details[0].type).toBe('string.fkNotFound');
+    expect(validationResult.error.details[0].type).toBe('fkNotFound');
   });
   // eslint-disable-next-line max-len
   it('passes valid data for two part parent FK when parent field name doesn\'t match lookup field name', () => {
@@ -223,7 +228,7 @@ describe('fkExtension', () => {
         ],
       },
     ];
-    const validationResult = Joi.validate(goodData, trickySchema, {
+    const validationResult = validate(goodData, trickySchema, {
       context: {
         data: goodData,
         schema: trickySchema,
@@ -244,7 +249,7 @@ describe('fkExtension', () => {
         { personId: 1, parentPersonId: 0 },
       ],
     };
-    const validationResult = Joi.validate(goodData, numberSchema, {
+    const validationResult = validate(goodData, numberSchema, {
       context: {
         data: goodData,
         schema: numberSchema,
