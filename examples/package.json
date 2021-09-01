@@ -9,7 +9,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "joi": "^14.3.1",
-    "joi-key-extensions": "^1.0.4"
+    "joi": "^17.4.2",
+    "joi-key-extensions": "^2.0.1"
   }
 }

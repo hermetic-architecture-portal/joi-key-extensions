@@ -16,30 +16,33 @@ const reachThisSchema = (schemaDesc, path) => {
   }
   if ((typeof path[0] === 'string')
     && (schemaDesc.type === 'object')) {
-    return reachThisSchema(schemaDesc.children[path[0]], nextPath);
+    return reachThisSchema(schemaDesc.keys[path[0]], nextPath);
   }
   return null;
 };
 
 const pkArrayExtension = joi => ({
-  name: 'array',
+  type: 'array',
   base: joi.array(),
-  language: {
+  messages: {
     noContext: 'The schema being validated must be passed in options.context.schema',
     // eslint-disable-next-line max-len
-    noPrimaryKeys: 'The schema being validated does not have primary keys on the child object at path "{{path}}"',
-    badSchema: 'The schema being validated does not have a child object at path "{{path}}"',
-    duplicateValue: 'There is a duplicate value at path {{path}} for keys {{keys}}',
+    noPrimaryKeys: 'The schema being validated does not have primary keys on the child object at path "{{#path}}"',
+    badSchema: 'The schema being validated does not have a child object at path "{{#path}}"',
+    duplicateValue: 'There is a duplicate value at path {{#path}} for keys {{#keys}}',
   },
-  rules: [
-    {
-      name: 'uniqueOnPks',
-      params: {
+  rules: {
+    uniqueOnPks: {
+      method() {
+        return this.$_addRule({ name: 'uniqueOnPks' });
       },
       // eslint-disable-next-line consistent-return
-      validate: (params, value, state, options) => {
+      validate: (value, helpers) => {
+        const options = helpers.prefs;
+        const { state } = helpers;
+
         if (!(options && options.context && options.context.schema)) {
-          return joi.createError('array.noContext', null, state, options);
+          return helpers.error('noContext', null);
         }
         // eslint-disable-next-line no-param-reassign
         options.context.schemaDesc = options.context.schemaDesc
@@ -49,23 +52,19 @@ const pkArrayExtension = joi => ({
 
         const arraySchema = reachThisSchema(schemaDesc, state.path);
         if (!arraySchema) {
-          return joi.createError(
-            'array.badSchema', { path: state.path.join('.') }, state, options,
-          );
+          return helpers.error('badSchema', { path: state.path.join('.') });
         }
         if ((arraySchema.type === 'array')
           && arraySchema.items && arraySchema.items.length
           && arraySchema.items[0].type === 'object') {
           const itemDesc = arraySchema.items[0];
-          pkFields = Object.getOwnPropertyNames(itemDesc.children)
-            .filter(fieldName => (itemDesc.children[fieldName].type !== 'array')
-              && itemDesc.children[fieldName].rules
-              && itemDesc.children[fieldName].rules.some(r => r.name === 'pk'));
+          pkFields = Object.getOwnPropertyNames(itemDesc.keys)
+            .filter(fieldName => (itemDesc.keys[fieldName].type !== 'array')
+              && itemDesc.keys[fieldName].rules
+              && itemDesc.keys[fieldName].rules.some(r => r.name === 'pk'));
         }
         if (!(pkFields && pkFields.length)) {
-          return joi.createError(
-            'array.noPrimaryKeys', { path: state.path.join('.') }, state, options,
-          );
+          return helpers.error('noPrimaryKeys', { path: state.path.join('.') });
         }
         if (value) {
           const uniqueKeys = [];
@@ -78,10 +77,9 @@ const pkArrayExtension = joi => ({
             const kv = keyValues[i];
             if (uniqueKeys.find(other => pkFields
               .every(fieldName => kv[fieldName] === other[fieldName]))) {
-              return joi.createError(
-                'array.duplicateValue',
+              return helpers.error(
+                'duplicateValue',
                 { path: state.path.join('.'), keys: JSON.stringify(kv) },
-                state, options,
               );
             }
             uniqueKeys.push(kv);
@@ -90,49 +88,37 @@ const pkArrayExtension = joi => ({
         return value;
       },
     },
-  ],
+  },
 });
 
 const pkStringExtension = joi => ({
-  name: 'string',
+  type: 'string',
   base: joi.string(),
-  // eslint-disable-next-line no-unused-vars
-  rules: [
-    {
-      name: 'pk',
-      params: {},
-      // eslint-disable-next-line no-unused-vars
-      validate: (params, value, state, prefs) => value,
+  rules: {
+    pk: {
+      validate: value => value,
     },
-  ],
+  },
 });
 
 const pkNumberExtension = joi => ({
-  name: 'number',
+  type: 'number',
   base: joi.number(),
-  // eslint-disable-next-line no-unused-vars
-  rules: [
-    {
-      name: 'pk',
-      params: {},
-      // eslint-disable-next-line no-unused-vars
-      validate: (params, value, state, prefs) => value,
+  rules: {
+    pk: {
+      validate: value => value,
     },
-  ],
+  },
 });
 
 const pkDateExtension = joi => ({
-  name: 'date',
+  type: 'date',
   base: joi.date(),
-  // eslint-disable-next-line no-unused-vars
-  rules: [
-    {
-      name: 'pk',
-      params: {},
-      // eslint-disable-next-line no-unused-vars
-      validate: (params, value, state, prefs) => value,
+  rules: {
+    pk: {
+      validate: value => value,
     },
-  ],
+  },
 });
 
 export default {

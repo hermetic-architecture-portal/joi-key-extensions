@@ -21,6 +21,10 @@ const complexSchema = Joi.object({
   }),
 });
 
+const validate = (data, schema, options) => {
+  return schema.validate(data, options);
+};
+
 describe('pkExtension', () => {
   it('passes with unique keys and basic schema', () => {
     const data = [
@@ -28,7 +32,7 @@ describe('pkExtension', () => {
       { key: '2', name: 'a' },
       { key: '3', name: 'a' },
     ];
-    const validationResult = Joi.validate(data, basicSchema, {
+    const validationResult = validate(data, basicSchema, {
       context: {
         schema: basicSchema,
       },
@@ -44,13 +48,13 @@ describe('pkExtension', () => {
         x: Joi.string(),
       }).uniqueOnPks(),
     });
-    const validationResult = Joi.validate(data, badSchema, {
+    const validationResult = validate(data, badSchema, {
       context: {
         schema: badSchema,
       },
     });
     expect(validationResult.error).toBeTruthy();
-    expect(validationResult.error.details[0].type).toBe('array.noPrimaryKeys');
+    expect(validationResult.error.details[0].type).toBe('noPrimaryKeys');
   });
   it('fails with non-unique keys and basic schema', () => {
     const data = [
@@ -58,13 +62,14 @@ describe('pkExtension', () => {
       { key: '2', name: 'b' },
       { key: '2', name: 'c' },
     ];
-    const validationResult = Joi.validate(data, basicSchema, {
+    const validationResult = validate(data, basicSchema, {
       context: {
         schema: basicSchema,
       },
     });
     expect(validationResult.error).toBeTruthy();
-    expect(validationResult.error.details[0].type).toBe('array.duplicateValue');
+    expect(validationResult.error.details[0].type).toBe('duplicateValue');
+    expect(validationResult.error.message).toBe('There is a duplicate value at path  for keys {"key":"2"}');
   });
   it('passes with unique keys and complex schema', () => {
     const data = {
@@ -77,7 +82,7 @@ describe('pkExtension', () => {
         },
       ],
     };
-    const validationResult = Joi.validate(data, complexSchema, {
+    const validationResult = validate(data, complexSchema, {
       context: {
         schema: complexSchema,
       },
@@ -95,23 +100,23 @@ describe('pkExtension', () => {
         },
       ],
     };
-    const validationResult = Joi.validate(data, complexSchema, {
+    const validationResult = validate(data, complexSchema, {
       context: {
         schema: complexSchema,
       },
     });
     expect(validationResult.error).toBeTruthy();
-    expect(validationResult.error.details[0].type).toBe('array.duplicateValue');
+    expect(validationResult.error.details[0].type).toBe('duplicateValue');
   });
   it('fails with non object child schema', () => {
     const data = [];
     const badSchema = Joi.array().uniqueOnPks().items(Joi.string());
-    const validationResult = Joi.validate(data, badSchema, {
+    const validationResult = validate(data, badSchema, {
       context: {
         schema: badSchema,
       },
     });
     expect(validationResult.error).toBeTruthy();
-    expect(validationResult.error.details[0].type).toBe('array.badSchema');
+    expect(validationResult.error.details[0].type).toBe('badSchema');
   });
 });

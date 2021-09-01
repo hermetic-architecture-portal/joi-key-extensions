@@ -8,3 +8,4 @@ rules:
   max-len: [ 2, { "code": 100, "ignoreComments": true, "ignoreTemplateLiterals": true } ]
   no-mixed-operators: [ 2, { "allowSamePrecedence": true }]
   import/no-unresolved: "off"
+  arrow-parens: ["error", "as-needed", { "requireForBlockBody": true }]
